@@ -1,5 +1,7 @@
-Wetty = Web + tty
------------------
+rtsh-wetty-cli = rtsh + web + tty
+--------------------------
+
+[rtsh](https://github.com/mogria/rtsh)client based on [wetty](https://github.com/krishnasrinivas/wetty).
 
 Terminal over HTTP and HTTPS. Wetty is an alternative to
 ajaxterm/anyterm but much better than them because wetty uses ChromeOS'

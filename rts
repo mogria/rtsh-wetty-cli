@@ -1,0 +1,11 @@
+#!/bin/sh
+# this is the part of the client which handles the command queue and gives all the commands to the server
+
+RTS_PATH="/rts"
+LN_PATH="$(dirname "$(realpath "$0")")"
+if cd "$LN_PATH" && pwd | grep -E "^$RTS_PATH"; then
+    echo "$0" "$@" > "$HOME/command-queue"
+else
+    echo "invalid command, you can only execute commands where there is a symlink in the /rts directory"
+fi
+

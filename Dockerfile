@@ -1,15 +1,27 @@
 FROM node:0.10.38
-MAINTAINER Nathan LeClaire <nathan@docker.com>
+MAINTAINER Mogria <m0gr14@gmail.com>
 
 ADD . /app
 WORKDIR /app
 RUN npm install
 RUN apt-get update
 RUN apt-get install -y vim
-RUN useradd -d /home/term -m -s /bin/bash term
-RUN echo 'term:term' | chpasswd
+RUN mkdir /rts && \
+    echo 'export PATH="$PATH:/rts"' > /etc/profile.d/rts-path.sh && \
+    groupadd --gid 1312 rtshplayers && \
+    useradd --uid 1337 rtshsrv
+
+ADD rts /rts/rts
+ADD public /app/public
+ADD start-script.sh /usr/bin/start-script.sh
+
+RUN chmod 700 /usr/bin/start-script.sh
+
+# for every command the client has add a symlink to rts here:
+RUN ln -s /rts/rts /rts/move
 
 EXPOSE 3000
 
-ENTRYPOINT ["node"]
-CMD ["app.js", "-p", "3000"]
+VOLUME ["/world", "/home", "/rts"]
+
+ENTRYPOINT ["start-script.sh"]
