@@ -5,6 +5,7 @@ var path = require('path');
 var server = require('socket.io');
 var pty = require('pty.js');
 var fs = require('fs');
+var fswalk = require('fs-walk');
 
 var opts = require('optimist')
     .options({
@@ -131,4 +132,34 @@ io.on('connection', function(socket){
     socket.on('disconnect', function() {
         term.end();
     });
+
+    fswalk.files('/world', function(basedir, filename, stat, next) {
+        var file = basedir + '/' + filename;
+        console.log("found " + file);
+        console.log("next:");
+        console.log(next);
+        fs.readFile(file, 'utf8', function(err, data) {
+            if(!err) {
+                console.log({ "file": file, "data": data })
+                socket.emit('mapinit', { "file": file, "data": data });
+            } else {
+                console.log("Error:");
+                console.log(err);
+            }
+        });
+        next();
+
+    });
+
 })
+
+var watchCallback;
+
+watchCallback = function(event, filename) {
+    console.log('[' + event + '] ' + filename);
+    if(event === 'rename') {
+        fs.watch('/world/' + filename, { persistence: false, recursive: true }, watchCallback);
+    }
+};
+
+fs.watch('/world', { persistent: false, recursive: true }, watchCallback);
