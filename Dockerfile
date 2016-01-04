@@ -8,7 +8,7 @@ RUN npm install
 RUN apt-get update
 RUN apt-get install -y vim
 RUN mkdir /rts && \
-    echo 'export PATH="$PATH:/rts"' > /etc/profile.d/rts-path.sh && \
+    echo 'export PATH="$PATH:/app/rts"' > /etc/profile.d/rts-path.sh && \
     groupadd --gid 1312 rtshplayers && \
     useradd --uid 1337 rtshsrv && \
     chmod 700 /usr/bin/start-script.sh
@@ -16,10 +16,10 @@ RUN mkdir /rts && \
 ADD . /app
 
 # for every command the client has add a symlink to rts here:
-RUN ln -s /rts/rts /rts/move
+RUN ln -s /app/rts/rts /app/rts/move
 
 EXPOSE 3000
 
-VOLUME ["/world", "/home", "/rts"]
+VOLUME ["/world", "/home", "/app"]
 
 ENTRYPOINT ["start-script.sh"]
