@@ -59,6 +59,36 @@ socket.on('output', function(data) {
     term.io.writeUTF16(data);
 });
 
+
 socket.on('disconnect', function() {
     console.log("Socket.io connection closed");
+});
+
+var map = [];
+
+socket.on('mapinit', function(filedata) {
+    var file = filedata.file;
+    var data = JSON.parse(filedata.data);
+
+    var positionRegex = /^\/world\/\(\d+\)\/\(\d+\)\//;
+    var matches;
+    if((matches = file.match(positionRegex) !== null)) {
+        var x = +matches[1];
+        var y = +matches[2];
+
+        if(map[x] === undefined) {
+            map[x] = []
+        }
+        map[x][y] = data;
+    }
+    console.log(map);
+});
+
+socket.on('mapupdate-created', function() {
+});
+
+socket.on('mapupdate-changed', function() {
+});
+
+socket.on('mapupdate-removed', function() {
 });
