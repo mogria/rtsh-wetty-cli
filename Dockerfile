@@ -1,10 +1,17 @@
-FROM node:0.10.38
+FROM node:latest
 MAINTAINER Mogria <m0gr14@gmail.com>
 
 ADD package.json /app/package.json
+ADD bin/wetty.js /app/bin/wetty.js
+ADD README.md /app/README.md
+ADD .bowerrc /app/.bowerrc
+ADD bower.json /app/bower.json
 ADD start-script.sh /usr/bin/start-script.sh
 WORKDIR /app
-RUN npm install
+RUN npm install --production && \
+    npm install -g bower && \
+    mkdir -p /app/public/vendor && \
+    bower install --allow-root
 RUN apt-get update
 RUN apt-get install -y vim
 RUN mkdir /rts && \
@@ -20,6 +27,6 @@ RUN ln -s /app/rts/rts /app/rts/move
 
 EXPOSE 3000
 
-VOLUME ["/world", "/home", "/app"]
+VOLUME ["/world", "/home", "/app/public"]
 
 ENTRYPOINT ["start-script.sh"]
