@@ -29,6 +29,7 @@ RUN mkdir /rts && \
     chmod 700 /usr/bin/start-script.sh
 
 ADD . /app
+ADD motd /etc/motd
 
 # for every command the client has add a symlink to rts here:
 RUN ln -s /app/rts/rts /app/rts/move
