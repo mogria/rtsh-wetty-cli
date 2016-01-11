@@ -25,10 +25,6 @@ var opts = require('optimist')
             demand: false,
             description: 'ssh server port'
         },
-        sshuser: {
-            demand: false,
-            description: 'ssh user'
-        },
         sshauth: {
             demand: false,
             description: 'defaults to "password", you can use "publickey,password" instead'
@@ -44,7 +40,6 @@ var runhttps = false;
 var sshport = 22;
 var sshhost = 'localhost';
 var sshauth = 'password';
-var globalsshuser = '';
 
 if (opts.sshport) {
     sshport = opts.sshport;
@@ -56,10 +51,6 @@ if (opts.sshhost) {
 
 if (opts.sshauth) {
 	sshauth = opts.sshauth
-}
-
-if (opts.sshuser) {
-    globalsshuser = opts.sshuser;
 }
 
 if (opts.sslkey && opts.sslcert) {
@@ -76,7 +67,7 @@ process.on('uncaughtException', function(e) {
 var httpserv;
 
 var app = express();
-app.get('/wetty/ssh/:user', function(req, res) {
+app.get('/rtsh/:user', function(req, res) {
     res.sendfile(__dirname + '/public/wetty/index.html');
 });
 app.use('/', express.static(path.join(__dirname, 'public')));
@@ -96,26 +87,21 @@ io.on('connection', function(socket){
     var sshuser = '';
     var request = socket.request;
     console.log((new Date()) + ' Connection accepted.');
-    if (match = request.headers.referer.match('/wetty/ssh/.+$')) {
-        sshuser = match[0].replace('/wetty/ssh/', '') + '@';
-    } else if (globalsshuser) {
-        sshuser = globalsshuser + '@';
+    if (match = request.headers.referer.match('/rtsh/.+$')) {
+        sshuser = match[0].replace('/rtsh/', '') + '@';
     }
 
-    var term;
-    if (process.getuid() == 0) {
-        term = pty.spawn('/bin/login', [], {
-            name: 'xterm-256color',
-            cols: 80,
-            rows: 30
-        });
-    } else {
-        term = pty.spawn('ssh', [sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
-            name: 'xterm-256color',
-            cols: 80,
-            rows: 30
-        });
+    if(sshuser === '') {
+        socket.close();
+        return;
     }
+
+    var term = pty.spawn('ssh', [sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
+        name: 'xterm-256color',
+        cols: 80,
+        rows: 30
+    });
+
     console.log((new Date()) + " PID=" + term.pid + " STARTED on behalf of user=" + sshuser)
     term.on('data', function(data) {
         socket.emit('output', data);
