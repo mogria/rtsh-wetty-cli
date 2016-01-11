@@ -70,21 +70,21 @@ function Tile($tile) {
 }
 
 Tile.prototype.update = function(data) {
-    this.$tile.removeClass('terrain-' + this.type);
+    this.$tile.removeClass('terrain-' + this.terrain);
     for(var prop in data) {
         if(data.hasOwnProperty(prop)) {
             this[prop] = data[prop];
         }
     }
-    this.$tile.addClass('terrain-' + this.type);
+    this.$tile.addClass('terrain-' + this.terrain);
 }
 
 function Map(filedata) {
     data = JSON.parse(filedata);
     this.map = [];
     this.name = data.name;
-    this.size_x = data.size_x;
-    this.size_y = data.size_y;
+    this.size_x = data.size[0];
+    this.size_y = data.size[1];
     for(var y = 0; y < this.size_y; y++) {
         this.map[y] = [];
         for(var x = 0; x < this.size_x; x++) {
@@ -108,7 +108,7 @@ socket.on('init-tile', function(filedata) {
     var file = filedata.file;
     var data = JSON.parse(filedata.data);
 
-    var positionRegex = /^\/world\/(\d+)\/(\d+)\//;
+    var positionRegex = /^\/world\/(\d+)\/(\d+)\/tile.json$/;
     var matches = file.match(positionRegex);
     if(matches !== null) {
         var x = +matches[1];
