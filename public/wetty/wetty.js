@@ -64,15 +64,19 @@ socket.on('disconnect', function() {
     console.log("Socket.io connection closed");
 });
 
-function Tile() {
+function Tile($tile) {
+    this.$tile = $tile;
+    this.type = 'none';
 }
 
 Tile.prototype.update = function(data) {
+    this.$tile.removeClass('terrain-' + this.type);
     for(var prop in data) {
         if(data.hasOwnProperty(prop)) {
             this[prop] = data[prop];
         }
     }
+    this.$tile.addClass('terrain-' + this.type);
 }
 
 function Map(filedata) {
@@ -84,7 +88,8 @@ function Map(filedata) {
     for(var y = 0; y < this.size_y; y++) {
         this.map[y] = [];
         for(var x = 0; x < this.size_x; x++) {
-            this.map[y][x] = new Tile();
+            var $tile = $("<div>").addClass('x_' + x).addClass('tile');
+            this.map[y][x] = new Tile($tile);
         }
     }
 }
@@ -119,8 +124,7 @@ socket.on('init-end', function() {
         $y = $("<div>").addClass('y_' + y).addClass('tilerow');
         $map.append($y);
         for(var x = 0; x < map.size_y; x++) {
-            $x = $("<div>").addClass('x_' + x).addClass('tile');
-            $y.append($x);
+            $y.append(map.map[y][x].$tile);
         }
     }
 });
