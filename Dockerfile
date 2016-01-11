@@ -8,7 +8,9 @@ ADD .bowerrc /app/.bowerrc
 ADD bower.json /app/bower.json
 ADD start-script.sh /usr/bin/start-script.sh
 WORKDIR /app
-RUN npm install --production && \
+# clone over git:// doesn't always work, rather use https://
+RUN git config --global url."https://github.com".insteadOf "git://github.com" && \
+    npm install --production && \
     npm install -g bower && \
     mkdir -p /app/public/vendor && \
     bower install --allow-root
