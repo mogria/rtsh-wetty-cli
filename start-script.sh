@@ -5,7 +5,7 @@ for player in "$@"; do
 done
 
 service ssh start
-# make sure it's own ssh key is nown so the user doesn't need to verify it
+# make sure it's own ssh key is known so the user doesn't need to verify it
 ssh-keyscan -H localhost >> /etc/ssh/ssh_known_hosts
 
 cat > /app/public/index.html <<INDEXHTML
