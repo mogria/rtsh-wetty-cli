@@ -6,6 +6,7 @@
     <title>rtsh</title>
     <script src="/wetty/hterm_all.js"></script>
     <script src="/wetty/socket.io/socket.io.js"></script>
+    <script src="/vendor/jquery/dist/jquery.js"></script>
     <script src="/wetty/wetty.js"></script>
     <style>
         html,
@@ -15,16 +16,30 @@
             margin: 0px;
         }
         #terminal {
+            top: 70%;
             display: block;
-            position: relative;
+            position: absolute;
             width: 100%;
             height: 30%;
+            clear: both;
         }
 
         #map {
             display: block;
-            position: relative;
+            position: absolute;
             height: 70%
+            overflow: hidden;
+        }
+
+        .tile {
+            display: block;
+            float: left;
+            height: 64px;
+            width: 64px;
+            border: 1px solid black;
+        }
+        .tilerow {
+            clear: both;
         }
     </style>
 </head>

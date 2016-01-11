@@ -133,28 +133,33 @@ io.on('connection', function(socket){
         term.end();
     });
 
-    socket.emit('init-start');
-    fswalk.files('/world', function(basedir, filename, stat, next) {
-        var file = basedir + '/' + filename;
-        console.log("found " + file);
-        console.log("next:");
-        console.log(next);
-        fs.readFile(file, 'utf8', function(err, data) {
-            if(!err) {
-                console.log({ "file": file, "data": data })
-                socket.emit('init-tile', { "file": file, "data": data });
-            } else {
-                console.log("Error:");
-                console.log(err);
+    fs.readFile('/world/world.json', 'utf8', function(err, data) {
+        if(err) {
+            console.log("Error: couldn't read /world/world.json");
+        }
+        socket.emit('init-start', data);
+
+        fswalk.files('/world', function(basedir, filename, stat, next) {
+            var file = basedir + '/' + filename;
+            console.log("found " + file);
+            if(filename !== 'world.json') {
+                fs.readFile(file, 'utf8', function(err, data) {
+                    if(!err) {
+                        console.log({ "file": file, "data": data })
+                        socket.emit('init-tile', { "file": file, "data": data });
+                    } else {
+                        console.log("Error:");
+                        console.log(err);
+                    }
+                });
             }
+            next();
+
+        }, function(err) {
+            if(err) console.log(err)
+            else socket.emit('init-end');
         });
-        next();
-
-    }, function(err) {
-        if(err) console.log(err)
-        else socket.emit('init-end');
     });
-
 })
 
 var watchCallback;
@@ -162,8 +167,15 @@ var watchCallback;
 watchCallback = function(event, filename) {
     console.log('[' + event + '] ' + filename);
     if(event === 'rename') {
-        fs.watch('/world/' + filename, { persistence: false, recursive: true }, watchCallback);
+        // fs.watch('/world/' + filename, { persistence: false, recursive: true }, watchCallback);
     }
 };
 
-fs.watch('/world', { persistent: false, recursive: true }, watchCallback);
+var watcher = fs.watch('/world', { persistent: false, recursive: true }, watchCallback);
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    watcher.close();
+    process.exit();
+});
+

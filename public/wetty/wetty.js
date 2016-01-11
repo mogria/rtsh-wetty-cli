@@ -64,24 +64,65 @@ socket.on('disconnect', function() {
     console.log("Socket.io connection closed");
 });
 
-var map = [];
+function Tile() {
+}
 
-socket.on('mapinit', function(filedata) {
+Tile.prototype.update = function(data) {
+    for(var prop in data) {
+        if(data.hasOwnProperty(prop)) {
+            this[prop] = data[prop];
+        }
+    }
+}
+
+function Map(filedata) {
+    data = JSON.parse(filedata);
+    this.map = [];
+    this.name = data.name;
+    this.size_x = data.size_x;
+    this.size_y = data.size_y;
+    for(var y = 0; y < this.size_y; y++) {
+        this.map[y] = [];
+        for(var x = 0; x < this.size_x; x++) {
+            this.map[y][x] = new Tile();
+        }
+    }
+}
+
+Map.prototype.updateTile = function(x, y, data) {
+    this.map[y][x].update(data);
+}
+
+var map;
+
+socket.on('init-start', function(data) {
+    map = new Map(data);
+});
+
+socket.on('init-tile', function(filedata) {
     var file = filedata.file;
     var data = JSON.parse(filedata.data);
 
-    var positionRegex = /^\/world\/\(\d+\)\/\(\d+\)\//;
-    var matches;
-    if((matches = file.match(positionRegex) !== null)) {
+    var positionRegex = /^\/world\/(\d+)\/(\d+)\//;
+    var matches = file.match(positionRegex);
+    if(matches !== null) {
         var x = +matches[1];
         var y = +matches[2];
-
-        if(map[x] === undefined) {
-            map[x] = []
-        }
-        map[x][y] = data;
+        map.updateTile(x, y, data);
     }
-    console.log(map);
+});
+
+socket.on('init-end', function() {
+    var $map = $("#map");
+
+    for(var y = 0; y < map.size_x ; y++) {
+        $y = $("<div>").addClass('y_' + y).addClass('tilerow');
+        $map.append($y);
+        for(var x = 0; x < map.size_y; x++) {
+            $x = $("<div>").addClass('x_' + x).addClass('tile');
+            $y.append($x);
+        }
+    }
 });
 
 socket.on('mapupdate-created', function() {
