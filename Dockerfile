@@ -30,15 +30,18 @@ RUN mkdir /rts && \
 
 ADD . /app
 
+# for every command the client has add a symlink to rts here:
+RUN ln -s /app/rts/rts /app/rts/move
+
 RUN chown -R rtshwetty:rtshwetty /app && \
     find /app -type f -exec chmod -R 400 '{}' \; && \
     find /app -type d -exec chmod -R 500 '{}' \; && \
     chown -R rtshsrv:rtshsrv /app/rts && \
+    chmod +x /app && \
+    chmod +r /app && \
     chmod -R +x /app/rts && \
     chmod -R +r /app/rts
 
-# for every command the client has add a symlink to rts here:
-RUN ln -s /app/rts/rts /app/rts/move
 
 EXPOSE 3000
 

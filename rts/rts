@@ -3,7 +3,7 @@
 
 RTS_PATH="/app/rts"
 LN_PATH="$(dirname "$(realpath "$0")")"
-if cd "$LN_PATH" && pwd | grep -E "^$RTS_PATH"; then
+if cd "$LN_PATH" && pwd | grep -E "^$RTS_PATH\$" > /dev/null; then
     FILEPATH=$0
     FILENAME="${FILEPATH##*/}"
     echo "$FILENAME" "$@" >> "$HOME/command-queue"
