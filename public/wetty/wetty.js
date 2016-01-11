@@ -71,12 +71,14 @@ function Tile($tile) {
 
 Tile.prototype.update = function(data) {
     this.$tile.removeClass('terrain-' + this.terrain);
+    this.$tile.find("img").remove();
     for(var prop in data) {
         if(data.hasOwnProperty(prop)) {
             this[prop] = data[prop];
         }
     }
     this.$tile.addClass('terrain-' + this.terrain);
+    this.$tile.append("<img src='/unit-swordFighter.png'>");
 }
 
 function Map(filedata) {
