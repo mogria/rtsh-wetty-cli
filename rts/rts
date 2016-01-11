@@ -4,7 +4,9 @@
 RTS_PATH="/app/rts"
 LN_PATH="$(dirname "$(realpath "$0")")"
 if cd "$LN_PATH" && pwd | grep -E "^$RTS_PATH"; then
-    echo "$0" "$@" > "$HOME/command-queue"
+    FILEPATH=$0
+    FILENAME="${FILEPATH##*/}"
+    echo "$FILENAME" "$@" >> "$HOME/command-queue"
 else
     echo "invalid command, you can only execute commands where there is a symlink in the $RTS_PATH directory"
 fi
