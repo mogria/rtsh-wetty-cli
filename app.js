@@ -133,6 +133,7 @@ io.on('connection', function(socket){
         term.end();
     });
 
+    socket.emit('init-start');
     fswalk.files('/world', function(basedir, filename, stat, next) {
         var file = basedir + '/' + filename;
         console.log("found " + file);
@@ -141,7 +142,7 @@ io.on('connection', function(socket){
         fs.readFile(file, 'utf8', function(err, data) {
             if(!err) {
                 console.log({ "file": file, "data": data })
-                socket.emit('mapinit', { "file": file, "data": data });
+                socket.emit('init-tile', { "file": file, "data": data });
             } else {
                 console.log("Error:");
                 console.log(err);
@@ -149,6 +150,9 @@ io.on('connection', function(socket){
         });
         next();
 
+    }, function(err) {
+        if(err) console.log(err)
+        else socket.emit('init-end');
     });
 
 })
