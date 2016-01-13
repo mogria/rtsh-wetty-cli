@@ -71,13 +71,17 @@ function Tile($tile) {
 
 Tile.prototype.update = function(data) {
     this.$tile.removeClass('terrain-' + this.terrain);
-    this.$tile.find("img").remove();
     for(var prop in data) {
         if(data.hasOwnProperty(prop)) {
             this[prop] = data[prop];
         }
     }
     this.$tile.addClass('terrain-' + this.terrain);
+
+}
+
+Tile.prototype.updateUnit = function(data) {
+    this.$tile.find("img").remove();
     this.$tile.append("<img src='/unit-swordFighter.png'>");
 }
 
@@ -110,12 +114,34 @@ socket.on('init-tile', function(filedata) {
     var file = filedata.file;
     var data = JSON.parse(filedata.data);
 
-    var positionRegex = /^\/world\/(\d+)\/(\d+)\/tile.json$/;
-    var matches = file.match(positionRegex);
-    if(matches !== null) {
-        var x = +matches[1];
-        var y = +matches[2];
+    var tilePositionRegex = /^\/world\/(\d+)\/(\d+)\/tile.json$/;
+    var tileMatches = file.match(tilePositionRegex);
+    if(tileMatches !== null) {
+        var x = +tileMatches[1];
+        var y = +tileMatches[2];
         map.updateTile(x, y, data);
+    }
+
+
+    var unitPositionRegex = /^\/world\/(\d+)\/(\d+)\/units\/unit-([a-zA-Z]+).json$/;
+    var unitMatches = file.match(unitPositionRegex);
+    if(unitMatches !== null) {
+        var x = +unitMatches[1];
+        var y = +unitMatches[2];
+        map[x][y].updateUnit(data);
+    }
+});
+
+socket.on('testtesttest', function(filedata) {
+    var file = filedata.file;
+    var data = JSON.parse(filedata.data);
+
+    var unitPositionRegex = /^\/world\/(\d+)\/(\d+)\/units\/unit-([a-zA-Z]+).json$/;
+    var unitMatches = file.match(unitPositionRegex);
+    if(unitMatches !== null) {
+        var x = +unitMatches[1];
+        var y = +unitMatches[2];
+        map[x][y].updateUnit(data);
     }
 });
 
