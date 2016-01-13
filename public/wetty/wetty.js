@@ -120,7 +120,7 @@ socket.on('init-tile', function(filedata) {
 });
 
 socket.on('init-end', function() {
-    var $map = $("#map");
+    var $map = $("#map").empty();
 
     for(var y = 0; y < map.size_x ; y++) {
         $y = $("<div>").addClass('y_' + y).addClass('tilerow');
