@@ -133,9 +133,6 @@ io.on('connection', function(socket){
                     if(!err) {
                         console.log({ "file": file, "data": data })
                         socket.emit('init-tile', { "file": file, "data": data });
-			if(filename === 'unit-swordfighter.json') {
-				socket.emit('testtesttest', { "file": file, "data": data });
-			}
                     } else {
                         console.log("Error:");
                         console.log(err);

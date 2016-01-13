@@ -82,7 +82,7 @@ Tile.prototype.update = function(data) {
 
 Tile.prototype.updateUnit = function(data) {
     this.$tile.find("img").remove();
-    this.$tile.append("<img src='/unit-swordFighter.png'>");
+    this.$tile.append("<img src='/unit-" + data.type + ".png'>");
 }
 
 function Map(filedata) {
@@ -102,6 +102,10 @@ function Map(filedata) {
 
 Map.prototype.updateTile = function(x, y, data) {
     this.map[y][x].update(data);
+}
+
+Map.prototype.updateUnit = function(x, y, data) {
+    this.map[y][x].updateUnit(data);
 }
 
 var map;
@@ -128,20 +132,7 @@ socket.on('init-tile', function(filedata) {
     if(unitMatches !== null) {
         var x = +unitMatches[1];
         var y = +unitMatches[2];
-        map[x][y].updateUnit(data);
-    }
-});
-
-socket.on('testtesttest', function(filedata) {
-    var file = filedata.file;
-    var data = JSON.parse(filedata.data);
-
-    var unitPositionRegex = /^\/world\/(\d+)\/(\d+)\/units\/unit-([a-zA-Z]+).json$/;
-    var unitMatches = file.match(unitPositionRegex);
-    if(unitMatches !== null) {
-        var x = +unitMatches[1];
-        var y = +unitMatches[2];
-        map[x][y].updateUnit(data);
+        map.updateUnit(x, y, data);
     }
 });
 
