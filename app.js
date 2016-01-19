@@ -6,6 +6,7 @@ var server = require('socket.io');
 var pty = require('pty.js');
 var fs = require('fs');
 var fswalk = require('fs-walk');
+var chokidar = require('chokidar');
 
 var opts = require('optimist')
     .options({
@@ -83,85 +84,89 @@ if (runhttps) {
 }
 
 var io = server(httpserv,{path: '/wetty/socket.io'});
-io.on('connection', function(socket){
-    var sshuser = '';
-    var request = socket.request;
-    console.log((new Date()) + ' Connection accepted.');
-    if (match = request.headers.referer.match('/rtsh/.+$')) {
-        sshuser = match[0].replace('/rtsh/', '') + '@';
-    }
-
-    if(sshuser === '') {
-        socket.close();
-        return;
-    }
-
-    var term = pty.spawn('ssh', [sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
-        name: 'xterm-256color',
-        cols: 80,
-        rows: 30
-    });
-
-    console.log((new Date()) + " PID=" + term.pid + " STARTED on behalf of user=" + sshuser)
-    term.on('data', function(data) {
-        socket.emit('output', data);
-    });
-    term.on('exit', function(code) {
-        console.log((new Date()) + " PID=" + term.pid + " ENDED")
-    });
-    socket.on('resize', function(data) {
-        term.resize(data.col, data.row);
-    });
-    socket.on('input', function(data) {
-        term.write(data);
-    });
-    socket.on('disconnect', function() {
-        term.end();
-    });
-
-    fs.readFile('/world/world.json', 'utf8', function(err, data) {
-        if(err) {
-            console.log("Error: couldn't read /world/world.json");
+var acceptConnections = function() {
+    io.on('connection', function(socket){
+        var sshuser = '';
+        var request = socket.request;
+        console.log((new Date()) + ' Connection accepted.');
+        if (match = request.headers.referer.match('/rtsh/.+$')) {
+            sshuser = match[0].replace('/rtsh/', '') + '@';
         }
-        socket.emit('init-start', data);
 
-        fswalk.files('/world', function(basedir, filename, stat, next) {
-            var file = basedir + '/' + filename;
-            console.log("found " + file);
-            if(filename !== 'world.json') {
-                fs.readFile(file, 'utf8', function(err, data) {
-                    if(!err) {
-                        console.log({ "file": file, "data": data })
-                        socket.emit('init-tile', { "file": file, "data": data });
-                    } else {
-                        console.log("Error:");
-                        console.log(err);
-                    }
-                });
+        if(sshuser === '') {
+            socket.close();
+            return;
+        }
+
+        var term = pty.spawn('ssh', [sshuser + sshhost, '-p', sshport, '-o', 'PreferredAuthentications=' + sshauth], {
+            name: 'xterm-256color',
+            cols: 80,
+            rows: 30
+        });
+
+        console.log((new Date()) + " PID=" + term.pid + " STARTED on behalf of user=" + sshuser)
+        term.on('data', function(data) {
+            socket.emit('output', data);
+        });
+        term.on('exit', function(code) {
+            console.log((new Date()) + " PID=" + term.pid + " ENDED")
+        });
+        socket.on('resize', function(data) {
+            term.resize(data.col, data.row);
+        });
+        socket.on('input', function(data) {
+            term.write(data);
+        });
+        socket.on('disconnect', function() {
+            term.end();
+        });
+
+        fs.readFile('/world/world.json', 'utf8', function(err, data) {
+            if(err) {
+                console.log("Error: couldn't read /world/world.json");
             }
-            next();
+            socket.emit('init-start', data);
 
-        }, function(err) {
-            if(err) console.log(err)
-            else socket.emit('init-end');
+            fswalk.files('/world', function(basedir, filename, stat, next) {
+                var file = basedir + '/' + filename;
+                console.log("found " + file);
+                if(filename !== 'world.json') {
+                    sendfile(socket, 'init-tile', file);
+                }
+                next();
+
+            }, function(err) {
+                if(err) console.log(err)
+                else socket.emit('init-end');
+            });
         });
     });
-})
-
-var watchCallback;
-
-watchCallback = function(event, filename) {
-    console.log('[' + event + '] ' + filename);
-    if(event === 'rename') {
-        // fs.watch('/world/' + filename, { persistence: false, recursive: true }, watchCallback);
-    }
 };
 
-var watcher = fs.watch('/world', { persistent: false, recursive: true }, watchCallback);
+function sendfile(socket, eventname, file) {
+    fs.readFile(file, 'utf8', function(err, data) {
+        if(!err) {
+            // console.log({ "file": file, "data": data })
+            socket.emit(eventname, { "file": file, "data": data });
+        } else {
+            console.log("Error:");
+            console.log(err);
+        }
+    });
+}
 
-process.on('SIGINT', function() {
+var watcher = chokidar.watch('/world', { recursive: true });
+watcher.on('add', path => sendfile(io.sockets, 'mapupdate-created', path))
+watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
+watcher.on('unlink', path => sendfile(io.sockets, 'mapupdate-removed', path))
+watcher.on('ready', () => acceptConnections());
+
+var finish = function() {
     console.log("Caught interrupt signal");
     watcher.close();
     process.exit();
-});
+};
+
+process.on('SIGTERM', finish);
+process.on('SIGINT', finish);
 

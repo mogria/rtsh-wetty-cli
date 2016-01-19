@@ -1,6 +1,12 @@
 FROM node:latest
 MAINTAINER Mogria <m0gr14@gmail.com>
 
+# install an ssh server and gosu
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y vim openssh-server && \
+    curl -o /usr/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" && \
+    chmod +x /usr/bin/gosu
+
 ADD package.json /app/package.json
 ADD bin/wetty.js /app/bin/wetty.js
 ADD README.md /app/README.md
@@ -13,10 +19,6 @@ RUN git config --global url."https://github.com".insteadOf "git://github.com" &&
     npm install -g bower && \
     mkdir -p /app/public/vendor && \
     bower install --allow-root
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y vim openssh-server && \
-    curl -o /usr/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" && \
-    chmod +x /usr/bin/gosu
 
 ADD start-script.sh /usr/bin/start-script.sh
 RUN mkdir /rts && \

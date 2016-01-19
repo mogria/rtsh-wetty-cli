@@ -82,7 +82,7 @@ Tile.prototype.update = function(data) {
 
 Tile.prototype.updateUnit = function(data) {
     this.$tile.find("img").remove();
-    this.$tile.append("<img src='/unit-" + data.type + ".png'>");
+    this.$tile.append("<img src='/img/units/" + data.type.toLowerCase() + ".png'>");
 }
 
 function Map(filedata) {
@@ -110,11 +110,7 @@ Map.prototype.updateUnit = function(x, y, data) {
 
 var map;
 
-socket.on('init-start', function(data) {
-    map = new Map(data);
-});
-
-socket.on('init-tile', function(filedata) {
+function handleFile(filedata) {
     var file = filedata.file;
     var data = JSON.parse(filedata.data);
 
@@ -134,6 +130,14 @@ socket.on('init-tile', function(filedata) {
         var y = +unitMatches[2];
         map.updateUnit(x, y, data);
     }
+}
+
+socket.on('init-start', function(data) {
+    map = new Map(data);
+});
+
+socket.on('init-tile', function(filedata) {
+    handleFile(filedata);
 });
 
 socket.on('init-end', function() {
@@ -148,11 +152,14 @@ socket.on('init-end', function() {
     }
 });
 
-socket.on('mapupdate-created', function() {
+socket.on('mapupdate-created', function(data) {
+    handleFile(data);
 });
 
-socket.on('mapupdate-changed', function() {
+socket.on('mapupdate-changed', function(data) {
+    handleFile(data);
 });
 
-socket.on('mapupdate-removed', function() {
+socket.on('mapupdate-removed', function(data) {
+    console.log(data);
 });
