@@ -21,6 +21,3 @@ node_modules/*
 
 # bower components directory
 public/js/vendor
-
-# this file is generated
-public/index.html
