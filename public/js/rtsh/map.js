@@ -15,11 +15,15 @@ define(['jquery', 'tile'], function($, Tile) {
     }
 
     Map.prototype.updateTile = function(x, y, data) {
-        this.map[y][x].update(data);
+        this.getTile(x, y).update(data);
+    }
+
+    Map.prototype.getTile = function(x, y) {
+        return this.map[y][x];
     }
 
     Map.prototype.updateUnit = function(x, y, data) {
-        this.map[y][x].updateUnit(data);
+        this.getTile(x, y).updateUnit(data);
     }
     return Map;
 });

@@ -1,24 +1,20 @@
 define(['jquery', 'wetty', 'map', 'tile'], function($, socket, Map, Tile) {
     var map;
 
+    var files = {};
+
     function handleFile(filedata) {
         var file = filedata.file;
         var data = JSON.parse(filedata.data);
 
-        var tilePositionRegex = /^\/world\/(\d+)\/(\d+)\/tile.json$/;
-        var tileMatches = file.match(tilePositionRegex);
-        if(tileMatches !== null) {
-            var x = +tileMatches[1];
-            var y = +tileMatches[2];
+        files[file] = data;
+
+        var x = data.position[0];
+        var y = data.position[1];
+
+        if(data["class"] == 'tile') {
             map.updateTile(x, y, data);
-        }
-
-
-        var unitPositionRegex = /^\/world\/(\d+)\/(\d+)\/units\/unit-([a-zA-Z]+).json$/;
-        var unitMatches = file.match(unitPositionRegex);
-        if(unitMatches !== null) {
-            var x = +unitMatches[1];
-            var y = +unitMatches[2];
+        } else if(data["class"] == 'unit') {
             map.updateUnit(x, y, data);
         }
     }

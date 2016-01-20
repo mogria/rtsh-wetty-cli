@@ -12,6 +12,7 @@ requirejs.config({
         wetty: 'wetty/wetty',
         tile: 'rtsh/tile',
         map: 'rtsh/map',
+        unit: 'rtsh/unit', 
         update: 'rtsh/update'
     }
 });
