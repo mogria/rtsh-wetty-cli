@@ -7,6 +7,7 @@ var pty = require('pty.js');
 var fs = require('fs');
 var fswalk = require('fs-walk');
 var chokidar = require('chokidar');
+var swig = require('swig');
 
 var opts = require('optimist')
     .options({
@@ -36,6 +37,9 @@ var opts = require('optimist')
             description: 'wetty listen port'
         },
     }).boolean('allow_discovery').argv;
+
+// positional arguments
+var players = opts._;
 
 var runhttps = false;
 var sshport = 22;
@@ -68,10 +72,25 @@ process.on('uncaughtException', function(e) {
 var httpserv;
 
 var app = express();
+app.engine('html', swig.renderFile);
+app.set('view engine', 'html');
+app.set('views', path.join(__dirname, 'public'));
+// use the caching of express
+app.set('view cache', false);
+swig.setDefaults({ cache: false });
 app.get('/rtsh/:user', function(req, res) {
-    res.sendfile(__dirname + '/public/wetty/index.html');
+    res.sendfile(__dirname + '/public/rtsh.html');
 });
+
+app.get('/', function(req, res) {
+   fs.readFile('/world/world.json', 'utf8', function(err, data) {
+       if(err) data = "no gameworld found"
+       res.render('index', {'players': players, 'world': JSON.parse(data)});
+   });
+});
+
 app.use('/', express.static(path.join(__dirname, 'public')));
+
 
 if (runhttps) {
     httpserv = https.createServer(opts.ssl, app).listen(opts.port, function() {
@@ -83,7 +102,7 @@ if (runhttps) {
     });
 }
 
-var io = server(httpserv,{path: '/wetty/socket.io'});
+var io = server(httpserv,{path: '/js/wetty/socket.io'});
 var acceptConnections = function() {
     io.on('connection', function(socket){
         var sshuser = '';
@@ -169,4 +188,3 @@ var finish = function() {
 
 process.on('SIGTERM', finish);
 process.on('SIGINT', finish);
-

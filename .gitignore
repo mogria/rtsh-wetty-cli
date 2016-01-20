@@ -12,11 +12,15 @@ pids
 logs
 results
 
+# vim
+*~
+*.sw*
+
 npm-debug.log
 node_modules/*
 
 # bower components directory
-public/vendor
+public/js/vendor
 
 # this file is generated
 public/index.html
