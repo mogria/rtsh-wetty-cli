@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+    <head>
+        <title>rtsh - game overview</title>
+        <style>
+        #main {
+            clear: both;
+        }
+        #players, #world {
+            float: left;
+            width: 50%;
+            height: 100%;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>rtsh - Game Overview</h1>
+        <div id="main">
+            <div id="players">
+                <h2>Players</h2>
+                <ul>
+                {% for player in players %}
+                    <li>{{ player }} - <a href="/rtsh/{{ player }}">Enter</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div id="world">
+                <h2>World</h2>
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ world.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Size</td>
+                            <td>{{ world.size[0] }}x{{ world.size[1] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Maximum Amount of Players</td>
+                            <td>{{ world.max_players }}</td>
+                        </tr>
+                        <tr>
+                            <td>Terrain Generator used</td>
+                            <td>{{ world.terrain_generator }}</td>
+                        </tr>
+                        <tr>
+                            <td>Terrain Generator Seed</td>
+                            <td>{{ world.seed }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>
+
