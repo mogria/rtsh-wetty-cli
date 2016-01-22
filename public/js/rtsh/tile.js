@@ -17,7 +17,7 @@ define(['jquery'], function($) {
 
     Tile.prototype.updateUnit = function(data) {
         this.$tile.find("img").remove();
-        this.$tile.append("<img src='/img/units/" + data.type.toLowerCase() + ".png'>");
+        this.$tile.append("<img src='/img/units/" + data.unit_type.toLowerCase() + ".png'>");
     }
 
     return Tile;
