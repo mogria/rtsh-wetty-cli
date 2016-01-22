@@ -140,27 +140,32 @@ var acceptConnections = function() {
             term.end();
         });
 
-        fs.readFile('/world/world.json', 'utf8', function(err, data) {
-            if(err) {
-                console.log("Error: couldn't read /world/world.json");
-            }
-            socket.emit('init-start', data);
-
-            fswalk.files('/world', function(basedir, filename, stat, next) {
-                var file = basedir + '/' + filename;
-                console.log("found " + file);
-                if(filename !== 'world.json') {
-                    sendfile(socket, 'init-tile', file);
-                }
-                next();
-
-            }, function(err) {
-                if(err) console.log(err)
-                else socket.emit('init-end');
-            });
-        });
+        initWorld(socket)
     });
 };
+
+
+function initWorld(socket) {
+    fs.readFile('/world/world.json', 'utf8', function(err, data) {
+        if(err) {
+            console.log("Error: couldn't read /world/world.json");
+        }
+        socket.emit('init-start', data);
+
+        fswalk.files('/world', function(basedir, filename, stat, next) {
+            var file = basedir + '/' + filename;
+            console.log("found " + file);
+            if(filename !== 'world.json') {
+                sendfile(socket, 'init-tile', file);
+            }
+            next();
+
+        }, function(err) {
+            if(err) console.log(err)
+            else socket.emit('init-end');
+        });
+    });
+}
 
 function sendfile(socket, eventname, file) {
     fs.readFile(file, 'utf8', function(err, data) {
@@ -177,7 +182,7 @@ function sendfile(socket, eventname, file) {
 var watcher = chokidar.watch('/world', { recursive: true });
 watcher.on('add', path => sendfile(io.sockets, 'mapupdate-created', path))
 watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
-watcher.on('unlink', path => sendfile(io.sockets, 'mapupdate-removed', path))
+watcher.on('unlink', () => initWorld(io.sockets))
 watcher.on('ready', () => acceptConnections());
 
 var finish = function() {
