@@ -1,7 +1,16 @@
-define(['jquery'], function($) {
+define(['jquery', 'unit'], function($, Unit) {
     function Tile($tile) {
         this.$tile = $tile;
         this.type = 'none';
+        this.units = [];
+
+        this.$tile.on("click", {tile: this}, this.updateTileContext);
+    }
+
+    Tile.prototype.updateTileContext = function(e) {
+        $tile = e.data.tile;
+        var $tileContext = $("#tileContext").empty();
+        $tileContext.append($tile.terrain);
     }
 
     Tile.prototype.update = function(data) {
@@ -16,8 +25,11 @@ define(['jquery'], function($) {
     }
 
     Tile.prototype.updateUnit = function(data) {
+        var unit = new Unit(data);
+        this.units.push(unit);
+
         this.$tile.find("img").remove();
-        this.$tile.append("<img src='/img/units/" + data.unit_type.toLowerCase() + ".png'>");
+        this.$tile.append("<img src='/img/units/" + unit.unit_type.toLowerCase() + ".png'>");
     }
 
     return Tile;
