@@ -11,6 +11,11 @@ define(['jquery', 'unit'], function($, Unit) {
         $tile = e.data.tile;
         var $tileContext = $("#tileContext").empty();
         $tileContext.append($tile.terrain);
+
+        $tile.units.forEach(function(unit, i, a) {
+            unitHtml = unit.getHtmlDisplay();
+            $tileContext.append(unitHtml);
+        });
     }
 
     Tile.prototype.update = function(data) {
@@ -21,7 +26,6 @@ define(['jquery', 'unit'], function($, Unit) {
             }
         }
         this.$tile.addClass('terrain-' + this.terrain);
-
     }
 
     Tile.prototype.updateUnit = function(data) {

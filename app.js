@@ -181,7 +181,7 @@ function sendfile(socket, eventname, file) {
 
 var watcher = chokidar.watch('/world', { recursive: true });
 watcher.on('add', path => sendfile(io.sockets, 'mapupdate-created', path))
-watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
+//watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
 watcher.on('unlink', () => initWorld(io.sockets))
 watcher.on('ready', () => acceptConnections());
 
