@@ -1,0 +1,15 @@
+FROM node:latest
+RUN npm install -g bower
+
+ENV HOME /tmp/bower-home
+RUN mkdir /tmp/bower-home && \
+    git config --system url."https://github.com".insteadOf "git://github.com" && \
+    chmod 777 /tmp/bower-home
+VOLUME ["/usr/src/app"]
+
+# set GIT_DIR environment variable to something invalid
+# so bower can successfully execute the git command regardless of the missing
+# supermodule
+ENV GIT_DIR ""
+WORKDIR /usr/src/app
+ENTRYPOINT ["bower"]
