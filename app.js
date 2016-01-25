@@ -170,7 +170,6 @@ function initWorld(socket) {
 function sendfile(socket, eventname, file) {
     fs.readFile(file, 'utf8', function(err, data) {
         if(!err) {
-            // console.log({ "file": file, "data": data })
             socket.emit(eventname, { "file": file, "data": data });
         } else {
             console.log("Error:");
@@ -179,10 +178,14 @@ function sendfile(socket, eventname, file) {
     });
 }
 
+function deletefile(socket, file) {
+    socket.emit('mapupdate-removed', { "file": file });
+}
+
 var watcher = chokidar.watch('/world', { recursive: true });
 watcher.on('add', path => sendfile(io.sockets, 'mapupdate-created', path))
-//watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
-watcher.on('unlink', () => initWorld(io.sockets))
+watcher.on('change', path => sendfile(io.sockets, 'mapupdate-changed', path))
+watcher.on('unlink', path => deletefile(io.sockets, path))
 watcher.on('ready', () => acceptConnections());
 
 var finish = function() {
