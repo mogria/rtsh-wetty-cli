@@ -1,39 +1,22 @@
-define(['jquery', 'unit'], function($, Unit) {
-    function Tile($tile) {
-        this.$tile = $tile;
-        this.type = 'none';
-        this.units = [];
-
-        this.$tile.on("click", {tile: this}, this.updateTileContext);
+define(['jquery', 'gameobject', 'util'], function($, GameObject, Util) {
+    function Tile(data, map) {
+        GameObject.call(this, data, map);
     }
 
-    Tile.prototype.updateTileContext = function(e) {
-        $tile = e.data.tile;
-        var $tileContext = $("#tileContext").empty();
-        $tileContext.append($tile.terrain);
+    Tile.prototype = Object.create(GameObject.prototype);
+    Tile.prototype.constructor = Tile;
 
-        $tile.units.forEach(function(unit, i, a) {
-            unitHtml = unit.getHtmlDisplay();
-            $tileContext.append(unitHtml);
-        });
+    Tile.prototype.createContext = function(map) {
+        return this.map.getTile(this.position[0], this.position[1])
     }
 
-    Tile.prototype.update = function(data) {
-        this.$tile.removeClass('terrain-' + this.terrain);
-        for(var prop in data) {
-            if(data.hasOwnProperty(prop)) {
-                this[prop] = data[prop];
-            }
-        }
-        this.$tile.addClass('terrain-' + this.terrain);
+    Tile.prototype.setInfoPane = function($infoPane, ev) {
+        GameObject.prototype.setInfoPane.call(this, $infoPane, ev);
+        $("<div>").text(this.terrain).insertAfter($infoPane.find("h3"));
     }
 
-    Tile.prototype.updateUnit = function(data) {
-        var unit = new Unit(data);
-        this.units.push(unit);
-
-        this.$tile.find("img").remove();
-        this.$tile.append("<img src='/img/units/" + unit.unit_type.toLowerCase() + ".png'>");
+    Tile.prototype.updateDisplay = function() {
+        this.$context.attr('class', 'tile terrain-' + this.terrain);
     }
 
     return Tile;

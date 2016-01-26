@@ -1,53 +1,56 @@
-define(['jquery', 'wetty', 'map', 'tile'], function($, socket, Map, Tile) {
+define(['jquery', 'wetty', 'map', 'gameobjectfactory', 'util'], function($, socket, Map, gameObjectFactory, Util) {
     var map;
 
     var files = {};
 
-    function handleFile(filedata) {
+    function handleFile(filedata, map) {
         var file = filedata.file;
         var data = JSON.parse(filedata.data);
 
-        files[file] = data;
-
-        var x = data.position[0];
-        var y = data.position[1];
-
-        if(data["class"] == 'tile') {
-            map.updateTile(x, y, data);
-        } else if(data["class"] == 'unit') {
-            map.updateUnit(x, y, data);
+        if(typeof files[file] === 'undefined') {
+            var gameobject = gameObjectFactory(map, data);
+            // make sure the factory could produce an object
+            if(typeof gameobject !== 'undefined') {
+                gameobject.updateDisplay();
+                var save = {}
+                // don't pollute data, because it gets displayed
+                // as json later again
+                Util.objcopy(data, save);
+                save.gameobject = gameobject;
+                files[file] = save;
+            }
+        } else {
+            files[file].gameobject.update(data);
         }
     }
 
+    function handleRemoval(filedata) {
+        var file = filedata.file;
+        files[file].gameobject.remove()
+        delete files[file];
+
+    }
+
     socket.on('init-start', function(data) {
-        map = new Map(data);
+        map = new Map(JSON.parse(data));
     });
 
     socket.on('init-tile', function(filedata) {
-        handleFile(filedata);
+        handleFile(filedata, map);
     });
 
     socket.on('init-end', function() {
-        var $map = $("#map").empty();
-
-        for(var y = 0; y < map.size_x ; y++) {
-            $y = $("<div>").addClass('y_' + y).addClass('tilerow');
-            $map.append($y);
-            for(var x = 0; x < map.size_y; x++) {
-                $y.append(map.map[y][x].$tile);
-            }
-        }
     });
 
     socket.on('mapupdate-created', function(data) {
-        handleFile(data);
+        handleFile(data, map);
     });
 
     socket.on('mapupdate-changed', function(data) {
-        handleFile(data);
+        handleFile(data, map);
     });
 
     socket.on('mapupdate-removed', function(data) {
-        console.log(data);
+        handleRemoval(data);
     });
 });

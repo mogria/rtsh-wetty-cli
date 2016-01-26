@@ -11,9 +11,12 @@ requirejs.config({
         socketio: 'wetty/socket.io/socket.io',
         wetty: 'wetty/wetty',
         tile: 'rtsh/tile',
+        gameobject: 'rtsh/gameobject',
+        gameobjectfactory: 'rtsh/gameobjectfactory',
         map: 'rtsh/map',
         unit: 'rtsh/unit', 
-        update: 'rtsh/update'
+        update: 'rtsh/update',
+        util: 'rtsh/util'
     }
 });
 
