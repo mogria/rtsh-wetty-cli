@@ -170,9 +170,12 @@ function initWorld(socket) {
 function sendfile(socket, eventname, file) {
     fs.readFile(file, 'utf8', function(err, data) {
         if(!err) {
-            // make sure we don't send empty files. This sometimes happens when
-            // the file just got created. Because an empty file is not valid JSON, don't even send it.
-            if(data != "") socket.emit(eventname, { "file": file, "data": data });
+            // does the file contain valid json data? If not, don't even send it
+            try {
+                JSON.parse(data);
+                socket.emit(eventname, { "file": file, "data": data });
+            } catch(e) {
+            }
         } else {
             console.log("Error:");
             console.log(err);
