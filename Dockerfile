@@ -34,9 +34,10 @@ ADD . /app
 ADD motd /etc/motd
 
 # for every command the client has add a symlink to rts here:
-RUN ln -s /app/rts/rts /app/rts/move
-RUN ln -s /app/rts/rts /app/rts/cheat_create_unit
-RUN ln -s /app/rts/rts /app/rts/move_unit
+RUN ln -s /app/rts/rts /app/rts/move && \
+    ln -s /app/rts/rts /app/rts/cheat_create_unit && \
+    ln -s /app/rts/rts /app/rts/move_unit && \
+    ln -s /app/rts/rts /app/rts/build
 
 RUN chown -R rtshwetty:rtshwetty /app && \
     find /app -type f -exec chmod -R 400 '{}' \; && \
