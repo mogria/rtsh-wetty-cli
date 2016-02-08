@@ -21,8 +21,7 @@ RUN git config --global url."https://github.com".insteadOf "git://github.com" &&
     bower install --allow-root
 
 ADD start-script.sh /usr/bin/start-script.sh
-RUN mkdir /rts && \
-    echo 'export PATH="$PATH:/app/rts"' > /etc/profile.d/rts-path.sh && \
+RUN echo 'export PATH="$PATH:/app/rts"' > /etc/profile.d/rts-path.sh && \
     groupadd --gid 1312 rtshplayers && \
     useradd --uid 1337 rtshsrv && \
     mkdir /rtshwetty && \
@@ -30,12 +29,16 @@ RUN mkdir /rts && \
     chown rtshwetty:rtshwetty /rtshwetty && \
     chmod 700 /usr/bin/start-script.sh
 
-ADD . /app
+ADD bin /app/bin
+ADD public /app/public
+ADD rts /app/rts/rts
+ADD app.js /app/app.js
+ADD LICENSE /app/LICENSE
 ADD motd /etc/motd
+ADD start-script.sh /app/start-script.sh
 
 # for every command the client has add a symlink to rts here:
-RUN ln -s /app/rts/rts /app/rts/move && \
-    ln -s /app/rts/rts /app/rts/cheat_create_unit && \
+RUN ln -s /app/rts/rts /app/rts/cheat_create_unit && \
     ln -s /app/rts/rts /app/rts/move_unit && \
     ln -s /app/rts/rts /app/rts/build
 

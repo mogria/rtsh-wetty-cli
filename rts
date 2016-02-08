@@ -1,12 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 # this is the part of the client which handles the command queue and gives all the commands to the server
 
+sh_escape() {
+    LC_ALL=C sed -e 's/[^a-zA-Z0-9,._+@%/-]/\\&/g; 1{$s/^$/""/}; 1!s/^/"/; $!s/$/"/'
+}
+
 RTS_PATH="/app/rts"
+WORKDIR="$PWD"
 LN_PATH="$(dirname "$(realpath "$0")")"
 if cd "$LN_PATH" && pwd | grep -E "^$RTS_PATH\$" > /dev/null; then
     FILEPATH=$0
     FILENAME="${FILEPATH##*/}"
-    echo "$FILENAME" "$@" >> "$HOME/command-queue"
+
+    ESCAPED_ARGS=()
+
+    for arg in "$@"; do
+        ESCAPED_ARGS+=("$(echo "$arg" | sh_escape)")
+    done
+
+    echo "$(echo "$WORKDIR" | sh_escape)" \
+        "$(echo "$FILENAME" | sh_escape)" \
+        "${ESCAPED_ARGS[@]}" >> "$HOME/command-queue"
 else
     echo "invalid command, you can only execute commands where there is a symlink in the $RTS_PATH directory"
 fi
